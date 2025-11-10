@@ -4,24 +4,27 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this to a random secret key
+app.secret_key = 'your-secret-key-here'
 
 class NotesWebApp:
     def __init__(self):
-        # Database connection strings - same as your tkinter app
+        # Azure SQL Database connection strings
         self.connection_strings = [
+            # Azure SQL with Entra Authentication (for local development)
+            "DRIVER={ODBC Driver 17 for SQL Server};SERVER=laserlink.database.windows.net;DATABASE=LaserLink;Authentication=ActiveDirectoryInteractive;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
+            
+            # Azure SQL with SQL Authentication (fallback)
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER=laserlink.database.windows.net;DATABASE=LaserLink;UID={os.getenv('AZURE_SQL_USER', '')};PWD={os.getenv('AZURE_SQL_PASSWORD', '')};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
+            
+            # Local connections (for testing)
             "DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=LaserCloudDB;Trusted_Connection=yes;",
-            "DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost;DATABASE=LaserCloudDB;Trusted_Connection=yes;TrustServerCertificate=yes;",
-            "DRIVER={SQL Server Native Client 11.0};SERVER=localhost;DATABASE=LaserCloudDB;Trusted_Connection=yes;",
-            "DRIVER={SQL Server};SERVER=localhost;DATABASE=LaserCloudDB;Trusted_Connection=yes;",
-            "DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost\\SQLEXPRESS;DATABASE=LaserCloudDB;Trusted_Connection=yes;",
         ]
     
     def connect_to_db(self):
-        """Establish database connection - same logic as tkinter app"""
+        """Establish database connection"""
         for i, conn_str in enumerate(self.connection_strings):
             try:
-                print(f"Trying connection {i+1}: {conn_str}")
+                print(f"Trying connection {i+1}")
                 return pyodbc.connect(conn_str)
             except pyodbc.Error as e:
                 print(f"Connection {i+1} failed: {e}")
@@ -131,4 +134,4 @@ def api_notes():
     return jsonify(notes_data)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)
