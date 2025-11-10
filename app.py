@@ -8,13 +8,13 @@ app.secret_key = 'your-secret-key-here'
 
 class NotesWebApp:
     def __init__(self):
-        # Azure SQL Database connection strings
+        # Azure SQL Database connection strings (Cloud-first approach)
         self.connection_strings = [
+            # Azure SQL with SQL Authentication (Primary for cloud)
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER=laserlink.database.windows.net;DATABASE=LaserLink;UID={os.getenv('AZURE_SQL_USER', 'sqladmin')};PWD={os.getenv('AZURE_SQL_PASSWORD', '')};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
+            
             # Azure SQL with Entra Authentication (for local development)
             "DRIVER={ODBC Driver 17 for SQL Server};SERVER=laserlink.database.windows.net;DATABASE=LaserLink;Authentication=ActiveDirectoryInteractive;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
-            
-            # Azure SQL with SQL Authentication (fallback)
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER=laserlink.database.windows.net;DATABASE=LaserLink;UID={os.getenv('AZURE_SQL_USER', '')};PWD={os.getenv('AZURE_SQL_PASSWORD', '')};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
             
             # Local connections (for testing)
             "DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=LaserCloudDB;Trusted_Connection=yes;",
@@ -134,4 +134,4 @@ def api_notes():
     return jsonify(notes_data)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=False, host='0.0.0.0', port=8000)
